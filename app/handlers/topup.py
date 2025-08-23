@@ -112,34 +112,3 @@ async def topup_receipt(message: Message, state: FSMContext):
 
     await message.answer("Квитанцію надіслано на перевірку. Очікуйте рішення адміністратора.")
     await state.set_state(TopUp.awaiting_admin)
-(TopUp.waiting_receipt)
-async def topup_wait_only(message: Message):
-    await message.answer("Надішліть фото/скрин квитанції у відповідь на повідомлення вище.")
-
-@router.message(TopUp.waiting_receipt, F.photo | F.document)
-async def topup_receipt(message: Message, state: FSMContext):
-    data = await state.get_data()
-    tid = data.get("topup_id")
-    amount = data.get("topup_amount")
-    if not tid or not amount:
-        await message.answer("Почніть із введення суми: /topup")
-        await state.set_state(TopUp.enter_amount)
-        return
-
-    admin_id = get_admin_id()
-    # Пересилаємо чек адміну і додаємо інлайн-кнопки для апрува/реджекта
-    try:
-        await message.forward(admin_id)
-        await message.bot.send_message(
-            chat_id=admin_id,
-            text=(f"🧾 Квитанція на поповнення\n"
-                  f"Користувач: {message.from_user.full_name} (id={message.from_user.id})\n"
-                  f"Сума: {amount} грн\n"
-                  f"TopUp ID: {tid}"),
-            reply_markup=topup_admin_review_kb(int(tid), int(message.from_user.id), int(amount))
-        )
-    except Exception:
-        pass
-
-    await message.answer("Квитанцію надіслано на перевірку. Очікуйте рішення адміністратора.")
-    await state.set_state(TopUp.awaiting_admin)
