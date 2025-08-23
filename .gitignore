@@ -1,13 +1,15 @@
-# Секрети
-.env
-
 # Python
 __pycache__/
 *.pyc
-
-# Бази
-*.db
-
-# Віртуальне середовище
 .venv/
+env/
 venv/
+
+# Tools / IDE
+.idea/
+.vscode/
+
+# Local artifacts
+*.zip
+data/cache/
+data/tmp/
