@@ -7,6 +7,9 @@ from app.config import get_admin_id
 from app.utils.inventory import complete_reservation, cancel_reservation, fetch_reservation
 from app.utils.balance import add_balance, set_balance, get_balance
 
+from app.utils.safe_answer import safe_answer
+from app.utils.topup import fetch_topup, set_topup_status
+
 router = Router()
 
 def _is_admin(user_id: int) -> bool:

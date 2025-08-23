@@ -1,0 +1,4 @@
+[tool.ruff]
+target-version = "py311"
+exclude = ["venv", ".venv", "__pycache__"]
+line-length = 100
