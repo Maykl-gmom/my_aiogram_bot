@@ -1,12 +1,14 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from typing import List, Tuple
 
+
 def categories_kb(categories: list[str]):
     kb = InlineKeyboardBuilder()
     for c in categories:
         kb.button(text=c, callback_data=f"cat:{c}")
     kb.adjust(2)
     return kb.as_markup()
+
 
 def products_kb(products: List[Tuple[str, int]]):
     kb = InlineKeyboardBuilder()
@@ -16,12 +18,14 @@ def products_kb(products: List[Tuple[str, int]]):
     kb.adjust(1)
     return kb.as_markup()
 
+
 def confirm_kb():
     kb = InlineKeyboardBuilder()
     kb.button(text="✅ Підтвердити", callback_data="confirm")
     kb.button(text="❌ Скасувати", callback_data="cancel")
     kb.adjust(2)
     return kb.as_markup()
+
 
 def cancel_reserve_kb():
     kb = InlineKeyboardBuilder()
@@ -32,6 +36,7 @@ def cancel_reserve_kb():
 def pay_or_cancel_kb(kind: str = "reserve"):
     # kind: "reserve" або "topup"
     from aiogram.utils.keyboard import InlineKeyboardBuilder
+
     kb = InlineKeyboardBuilder()
     if kind == "topup":
         kb.button(text="Оплатив", callback_data="pay:topup")
@@ -42,7 +47,7 @@ def pay_or_cancel_kb(kind: str = "reserve"):
     kb.adjust(2)
     # додамо кнопку оплати з балансу лише для режиму reserve
     try:
-        if str(mode) == "reserve":
+        if True:
             kb.button(text="💳 Оплатити з балансу", callback_data="paybal:now")
             # Тобі вирішувати як компонувати: один стовпець ок
             kb.adjust(1)
@@ -53,6 +58,7 @@ def pay_or_cancel_kb(kind: str = "reserve"):
 
 def confirm_with_balance_kb():
     from aiogram.utils.keyboard import InlineKeyboardBuilder
+
     kb = InlineKeyboardBuilder()
     kb.button(text="✅ Підтвердити замовлення", callback_data="confirm")
     kb.button(text="❌ Скасувати", callback_data="cancel")

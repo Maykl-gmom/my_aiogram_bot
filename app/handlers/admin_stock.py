@@ -2,7 +2,8 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message
 from pathlib import Path
-import os, time
+import os
+import time
 from app.config import ADMIN_ID
 from app.utils.inventory import STOCK_DIR
 
@@ -11,8 +12,10 @@ router = Router()
 # Білий список фото-розширень
 ALLOWED_PHOTO_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 
+
 def _is_admin(uid: int) -> bool:
     return str(uid) == str(ADMIN_ID)
+
 
 @router.message(F.chat.type == "private", Command("addstock"))
 async def addstock_cmd(message: Message):
@@ -23,14 +26,18 @@ async def addstock_cmd(message: Message):
     # Формат: /addstock Категорія | Товар (у ВІДПОВІДІ на фото/документ)
     parts = message.text.split(None, 1)
     if len(parts) < 2 or "|" not in parts[1]:
-        return await message.answer("Формат: /addstock Категорія | Товар (у ВІДПОВІДІ на фото/документ)")
+        return await message.answer(
+            "Формат: /addstock Категорія | Товар (у ВІДПОВІДІ на фото/документ)"
+        )
 
     category, product = [x.strip() for x in parts[1].split("|", 1)]
     if not category or not product:
         return await message.answer("Вкажи обидва поля: Категорія | Товар")
 
     if not message.reply_to_message:
-        return await message.answer("Зроби /addstock у ВІДПОВІДІ на повідомлення з фото або документом.")
+        return await message.answer(
+            "Зроби /addstock у ВІДПОВІДІ на повідомлення з фото або документом."
+        )
 
     reply = message.reply_to_message
 
@@ -49,10 +56,14 @@ async def addstock_cmd(message: Message):
         name = reply.document.file_name or f"file_{int(time.time())}"
         ext = os.path.splitext(name)[1].lower()
         if ext not in ALLOWED_PHOTO_EXTS:
-            return await message.answer("Тільки формати .jpg, .jpeg, .png, .webp будуть завантажені. Будь уважним!")
+            return await message.answer(
+                "Тільки формати .jpg, .jpeg, .png, .webp будуть завантажені. Будь уважним!"
+            )
         filename = f"{int(time.time())}{ext}"
     else:
-        return await message.answer("Потрібно фото або документ-ізображення (.jpg/.jpeg/.png/.webp).")
+        return await message.answer(
+            "Потрібно фото або документ-ізображення (.jpg/.jpeg/.png/.webp)."
+        )
 
     # Папка призначення
     dest_dir = Path(STOCK_DIR) / category / product
@@ -65,4 +76,6 @@ async def addstock_cmd(message: Message):
     # Щоб черга була FIFO: нові файли в кінець (свіжий mtime)
     os.utime(dest_path, None)
 
-    await message.answer(f"✅ Додано у сток:\nКатегорія: <b>{category}</b>\nТовар: <b>{product}</b>\nФайл: <code>{dest_path.name}</code>")
+    await message.answer(
+        f"✅ Додано у сток:\nКатегорія: <b>{category}</b>\nТовар: <b>{product}</b>\nФайл: <code>{dest_path.name}</code>"
+    )

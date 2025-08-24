@@ -1,9 +1,9 @@
 from typing import Dict, List, Tuple
 import os
-import time
 
 # Кешуємо products.txt по mtime, щоб не читати файл кожен раз
 _CACHE: Dict[str, object] = {"mtime": None, "data": {}}
+
 
 def _read_products_raw(path: str) -> Dict[str, List[Tuple[str, int]]]:
     categories: Dict[str, List[Tuple[str, int]]] = {}
@@ -30,6 +30,7 @@ def _read_products_raw(path: str) -> Dict[str, List[Tuple[str, int]]]:
                 current = line
                 categories.setdefault(current, [])
     return categories
+
 
 def read_products(path: str = "data/products.txt") -> Dict[str, List[Tuple[str, int]]]:
     try:

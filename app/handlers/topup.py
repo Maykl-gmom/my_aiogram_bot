@@ -5,9 +5,8 @@ from aiogram.fsm.context import FSMContext
 import time
 
 from app.states.topup import TopUp
-from app.keyboards.topup import topup_waiting_kb, topup_resume_kb, topup_admin_review_kb
+from app.keyboards.topup import topup_waiting_kb, topup_admin_review_kb
 from app.utils.topup import create_topup, fetch_active_topup_for_user, set_topup_status
-from app.utils.balance import get_balance, add_balance
 from app.config import get_card_number, get_admin_id
 from app.utils.telegram import safe_answer
 from app.keyboards.main import main_menu_kb
@@ -16,12 +15,16 @@ router = Router()
 MIN_AMOUNT = 100
 MAX_AMOUNT = 8000
 
+
 # Старт топапу
 @router.message(Command("topup"))
 @router.message(F.text.lower().in_({"поповнити баланс", "поповнення", "поповнення балансу"}))
 async def topup_start(message: Message, state: FSMContext):
-    await message.answer(f"Вкажіть суму поповнення одним числом від {MIN_AMOUNT} до {MAX_AMOUNT} грн.")
+    await message.answer(
+        f"Вкажіть суму поповнення одним числом від {MIN_AMOUNT} до {MAX_AMOUNT} грн."
+    )
     await state.set_state(TopUp.enter_amount)
+
 
 # Ввід суми
 @router.message(TopUp.enter_amount, F.text)
@@ -45,14 +48,18 @@ async def topup_amount(message: Message, state: FSMContext):
         f"Карта для переказу: <code>{get_card_number()}</code>\n"
         f"Час на відправку квитанції: <b>{mins} хв {secs} с</b>\n\n"
         f"Після оплати надішліть <b>квитанцію</b> (фото/скрин) у відповідь на це повідомлення.",
-        reply_markup=topup_waiting_kb()
+        reply_markup=topup_waiting_kb(),
     )
     await state.set_state(TopUp.waiting_receipt)
+
 
 # Підказка, що робити
 @router.callback_query(TopUp.waiting_receipt, F.data == "topup:paid_hint")
 async def topup_paid_hint(callback: CallbackQuery, state: FSMContext):
-    await callback.answer("Надішліть фото/скрин квитанції у відповідь на повідомлення вище.", show_alert=True)
+    await callback.answer(
+        "Надішліть фото/скрин квитанції у відповідь на повідомлення вище.", show_alert=True
+    )
+
 
 # Скасувати топап
 @router.callback_query(F.data == "topup:cancel")
@@ -64,6 +71,7 @@ async def topup_cancel(callback: CallbackQuery, state: FSMContext):
     await state.clear()
     await callback.message.edit_text("Поповнення скасовано.", reply_markup=main_menu_kb())
     await safe_answer(callback)
+
 
 # Резюм топапу
 @router.callback_query(F.data == "topup:resume")
@@ -80,9 +88,10 @@ async def topup_resume(callback: CallbackQuery, state: FSMContext):
         f"🧾 Активне поповнення: <b>{t.amount} грн</b>\n"
         f"Залишилось часу: <b>{mins} хв {secs} с</b>\n"
         f"Карту для переказу дивись у попередньому повідомленні.",
-        reply_markup=topup_waiting_kb()
+        reply_markup=topup_waiting_kb(),
     )
     await safe_answer(callback)
+
 
 # Прийом квитанції: фото чи документ
 @router.message(TopUp.waiting_receipt, F.photo | F.document)
@@ -101,11 +110,13 @@ async def topup_receipt(message: Message, state: FSMContext):
         await message.forward(admin_id)
         await message.bot.send_message(
             chat_id=admin_id,
-            text=(f"🧾 Квитанція на поповнення\n"
-                  f"Користувач: {message.from_user.full_name} (id={message.from_user.id})\n"
-                  f"Сума: {amount} грн\n"
-                  f"TopUp ID: {tid}"),
-            reply_markup=topup_admin_review_kb(int(tid), int(message.from_user.id), int(amount))
+            text=(
+                f"🧾 Квитанція на поповнення\n"
+                f"Користувач: {message.from_user.full_name} (id={message.from_user.id})\n"
+                f"Сума: {amount} грн\n"
+                f"TopUp ID: {tid}"
+            ),
+            reply_markup=topup_admin_review_kb(int(tid), int(message.from_user.id), int(amount)),
         )
     except Exception:
         pass

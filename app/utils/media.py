@@ -1,9 +1,9 @@
 from pathlib import Path
 from PIL import Image
-import os
 
 CACHE_DIR = Path("data/cache/photos")
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
 
 def ensure_jpeg(src_path: Path) -> Path:
     """
@@ -16,7 +16,7 @@ def ensure_jpeg(src_path: Path) -> Path:
         return src
 
     # Цільовий файл у кеші
-    dst = (CACHE_DIR / src.with_suffix(".jpg").name)
+    dst = CACHE_DIR / src.with_suffix(".jpg").name
 
     # Уникнути колізій і перезаписів
     i = 1
@@ -40,7 +40,7 @@ def ensure_jpeg(src_path: Path) -> Path:
         w, h = im.size
         if max(w, h) > max_side:
             scale = max_side / float(max(w, h))
-            im = im.resize((int(w*scale), int(h*scale)))
+            im = im.resize((int(w * scale), int(h * scale)))
 
         im.save(dst, format="JPEG", quality=85, optimize=True, progressive=True)
 
